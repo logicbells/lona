@@ -1,0 +1,227 @@
+﻿@page
+@*@model IndexModel*@
+@{
+    ViewData["Title"] = "Home page";
+}
+<link href="~/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+<div class="container">
+    <br />
+    <div>
+        <table id="products" class="table display table-striped table-hover table-bordered table-condensed">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Id </th>
+                    <th>Name</th>
+                    <th>Amount</th>
+                    <th>Termly Payable</th>
+                    <th>Total Payable</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody class="product-index">
+            </tbody>
+        </table>
+
+       
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Payment History</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-striped table-sm" id="test">
+                            <!-- here goes our data! -->
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+     
+
+    </div>
+</div>
+@section Scripts
+{
+
+    <script>
+
+        $(document).ready(function () {
+            const api_url = "api/loans";
+            getapi(api_url);
+
+            async function getapi(url) {
+                const response = await fetch(url);
+                var datas = await response.json();
+                console.log(datas);
+                if (response) {
+                    var table = $("#products").DataTable({
+                        lengthMenu: [
+                            [20, 50, 100, 500],
+                            [20, 50, 100, 500, "All"],
+                        ],
+                        data: datas,
+                        destroy: true,
+                        columns: [
+                            {
+                                className: "dt-control",
+                                orderable: false,
+                                data: null,
+                                defaultContent: "",
+                            },
+                            { data: "id", targets: [1] },
+                            { data: "applicantName" },
+                            {
+                                data: "amount",
+                                render: function (data, type) {
+                                    var number = $.fn.dataTable.render.number(",", ".", 2, "N").display(data);
+                                    return number;
+                                },
+                            },
+                            {
+                                data: "termlyAmountPayable",
+                                render: function (data, type) {
+                                    var number = $.fn.dataTable.render.number(",", ".", 2, "N").display(data);
+                                    return number;
+                                },
+                            },
+
+                            {
+                                data: "totalAmountPayable",
+                                render: function (data, type) {
+                                    var number = $.fn.dataTable.render.number(",", ".", 2, "N").display(data);
+                                    return number;
+                                },
+                            },
+                            {
+                                data: "id",
+                                "render": function (data, row) { return `<button type='button'  class='btn btn-success btn-sm' onclick=Approve(${data},'Approved')>Approve</button>` }
+                            }
+                        ],
+                    });
+
+                    function format(d) {
+                        return `<div class="card">
+                <h5 class="card-header">Details</h5>
+                <a href="#" id="${d.id}" class="btn btn-danger btn-sm" onclick=Approve(${d.id},'Declined')>Decline</a>
+                <div class="card-body">
+                <div class="list-group">
+                <a href="#" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <h3 class="mb-1">${d.address}</h5>
+                    <small class="text-muted">${new Date(d.dateCreated).toLocaleDateString("en-NG", { year: "numeric", month: "short", day: "numeric" })}</small>
+                </div>
+                <p class="mb-1">Applicant Id: ${d.applicantId}</p>
+                <p class="mb-1">Term: ${d.term} months</p>
+                <p class="mb-1">Interest Rate: ${d.interestRate}%</p>
+                <p class="mb-1">Payment Plan: ${d.paymentPlan}</p>
+                <p class="mb-1">Email Address: ${d.email}</p>
+                <p class="mb-1">Date Of Birth: ${d.dateOfBirth}</p>
+                <p class="mb-1">Home Owner: ${d.homeOwner}</p>
+                <p class="mb-1">Status Action By: ${d.approvalStatusActionByStaffName}</p>
+                <p class="mb-1">Approval Status: ${d.approvalStatus}</p>
+                <p class="mb-1">Status Changed On: ${d.approvalStatusDate}</p>
+                  
+
+                <a href="#" class="btn btn-primary btn-sm" onclick=Log(${JSON.stringify(d.items)})>View BreakDown</a>
+
+                 </div>
+                 </div>
+                </div>`;
+                    }
+
+                    $("#products tbody").on("click", "td.dt-control", function () {
+                        var tr = $(this).closest("tr");
+                        var row = table.row(tr);
+
+                        if (row.child.isShown()) {
+                            $("div.card", row.child()).slideUp(function () {
+                                row.child.hide();
+                                tr.removeClass("shown");
+                            });
+                        } else {
+                            row.child(format(row.data()), "no-padding").show();
+                            tr.addClass("shown");
+                            $("div.card", row.child()).slideDown();
+                        }
+                    });
+
+
+                  
+                }
+            }
+
+
+
+
+        });
+
+        async function Approve(id, status) {
+            console.log(id, status);
+            const dataObject = {
+                id: id,
+                approvalStatus: status,
+                staffId: 1
+            };
+            console.log('dataObject', dataObject);
+
+            await fetch("api/updateloan", {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dataObject)
+            }).then(response => {
+                location.replace(`approvesuccess`); 
+            }).then(data =>
+                console.log(data)
+            );
+        };
+
+       
+        function Log(x) {
+            console.log('c', x);
+
+            @*let table = document.querySelector("table");*@
+            let table = document.getElementById('test');
+            let data = Object.keys(x[0]);
+            generateTableHead(table, data);
+            generateTable(table, x);
+            $("#exampleModal").modal("show");
+        }
+
+        function generateTableHead(table, data) {
+            let thead = table.createTHead();
+            let row = thead.insertRow();
+            for (let key of data) {
+                let th = document.createElement("th");
+                let text = document.createTextNode(key);
+                th.appendChild(text);
+                row.appendChild(th);
+            }
+        }
+
+        function generateTable(table, data) {
+            for (let element of data) {
+                let row = table.insertRow();
+                for (key in element) {
+                    let cell = row.insertCell();
+                    let text = document.createTextNode(element[key]);
+                    cell.appendChild(text);
+                }
+            }
+        }
+
+    </script>
+
+    <script src="~/lib/datatables/datatables.min.js"></script>
+}

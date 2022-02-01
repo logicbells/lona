@@ -1,0 +1,496 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+@*<div class="text-center">
+        <h1 class="display-4">Welcome</h1>
+        <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    </div>
+*@
+
+<style>
+
+    html {
+        background: #6441A5;
+        background: -webkit-linear-gradient(to left, #6441A5, #2a0845);
+    }
+
+    .error {
+        color: red;
+    }
+</style>
+
+<!-- MultiStep Form -->
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div id="msform">
+                <!-- progressbar -->
+                <ul id="progressbar">
+                    <li class="active">Loan Amount</li>
+                    <li>Loan BreakDown</li>
+                    <li>Personal Detail</li>
+                </ul>
+                <!-- sections -->
+                <section>
+                    <h2 class="fs-title">Loan Amount</h2>
+                    <h3 class="fs-subtitle">Drag the slider to select loan amount.</h3>
+
+                    <h4><span class="text-success fw-bold" id="demo"></span></h4>
+
+                    <div class="row my-6">
+                        <p class=" text-start fs-6 text-secondary p-0">20,000</p>
+                        <input type="range" min="20000" max="50000" value="25000" class="form-range" id="myRange">
+                        <p class="text-end fs-6 text-secondary">50,000</p>
+                    </div>
+
+                    <div class="row my-6">
+
+                        <h5 class="text-center">Payment Plans</h5>
+                    </div>
+
+                    <div class="d-flex mb-6">
+                        <div class="p-3 flex-fill bg-danger text-white">
+                            <input disabled type="radio" class="btn-check" name="options-outlined" id="danger-outlined" autocomplete="off">
+                            <label class="btn btn-outline-danger text-white" for="danger-outlined">12 months</label>
+                        </div>
+                        <div class="p-3 flex-fill bg-success text-white">
+                            <input type="radio" class="btn-check" name="options-outlined" id="success-outlined" autocomplete="off" checked>
+                            <label class="btn btn-outline-success" for="success-outlined">18 months</label>
+                        </div>
+                    </div>
+                    <input type="button" name="next" class="next action-button mt-4" value="Next" />
+                </section>
+
+                <section>
+                    <h2 class="fs-title">Loan BreakDown</h2>
+                    <h3 class="fs-subtitle">Total Payable: <span class="fs-title" id="totalOwed"></span> </h3>
+
+                    <h3 class="fs-subtitle">18 Scheduled Payments </h3>
+
+                    <ul id="paymentList" class="list-group">
+                    </ul>
+                    <input type="button" name="previous" class="previous action-button-previous" value="Previous" />
+                    <input type="button" name="next" class="next action-button" value="Next" />
+                </section>
+
+                <section>
+                    <h2 class="fs-title">Personal Information</h2>
+                    <h3 class="fs-subtitle">Fill in your credentials</h3>
+                    <input type="hidden" asp-for="ServerDate" id="serverDate" />
+                    <form id="loanForm" name="registration">
+                        <input type="hidden" id="amount" name="amount" value="0.00">
+                        <input type="hidden" id="termlyAmountPayable" name="termlyAmountPayable" value="0.00">
+                        <input type="hidden" id="totalAmountPayable" name="totalAmountPayable" value="0.00">
+                        <input type="hidden" id="term" name="term" value="18">
+                        <input type="hidden" id="paymentPlan" name="paymentPlan" value="monthly">
+                        <input type="hidden" id="interestRate" name="interestRate" value="15">
+
+                        <div class="form-check mb-4">
+                            <input name="homeOwner" class="form-check-input" type="checkbox" id="homeOwner" checked="checked">
+                            <label class="form-check-label text-start" for="flexCheckDefault">Are you a home owner?</label>
+                        </div>
+
+                        <input type="text" name="name" placeholder="Name" />
+                        <input type="text" name="email" placeholder="Email" />
+                        <textarea name="address" rows="2" placeholder="Address"></textarea>
+
+
+                        <div class="form-group">
+                            <div class="input-group date">
+                                <input type="text" class="form-control inputstl" name="dateOfBirth" id="dateOfBirth" placeholder="Select Date of Birth"><span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+
+                            </div>
+                        </div>
+
+                        <input type="button" id="previous" class="previous action-button-previous" value="Previous" />
+                        <input type="submit" id="btnSaveLoan" class="submit action-button" value="Submit" />
+                    </form>
+                </section>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- /.MultiStep Form -->
+
+
+
+
+@section Scripts
+{
+    <script>
+
+        $(function () {
+            var url = `success`;
+            const term = Number($('#term').val());
+            const serverDate = $('#serverDate').val();
+
+            function addMonths(date, months) {
+                var d = date.getDate();
+                date.setMonth(date.getMonth() + +months);
+                if (date.getDate() != d) {
+                    date.setDate(0);
+                }
+                return date.toLocaleDateString('en-NG').split('/').reverse().join('-');
+            }
+
+            console.log('serverDate', serverDate);
+            const nextMonthDate = addMonths(new Date(serverDate), 1);
+            var eighteenMonth = addMonths(new Date(serverDate), term);
+
+    var paymentListArray;
+
+    $('.input-group.date').datepicker({
+        calendarWeeks: true,
+        todayHighlight: true,
+        autoclose: true,
+        format: "yyyy-mm-dd"
+    });
+
+    $.validator.addMethod("minAge", function (value, element, min) {
+        var today = new Date();
+        var birthDate = new Date(value);
+        var age = today.getFullYear() - birthDate.getFullYear();
+
+        if (age > min + 1) {
+            return true;
+        }
+
+        var m = today.getMonth() - birthDate.getMonth();
+
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+
+        return age >= min;
+    }, "You are not old enough!");
+
+
+    $("#loanForm").validate({
+        rules: {
+
+            name: {
+                required: true,
+                minlength: 2,
+                maxlength: 20
+            },
+            email: {
+                required: true,
+                email: true
+            },
+            address: "required",
+            dateOfBirth: {
+                required: true,
+                minAge: 18
+            }
+
+        },
+        // Specify validation error messages
+        messages: {
+            name: {
+                required: "Please enter your full name",
+                minlength: "You must type a minimum of 2 characters!",
+                maxlength: "You cannot enter more than 20 characters!"
+            },
+            email: "Please enter a valid email address",
+            address: "Please enter your address",
+            dateOfBirth: {
+                required: "Please enter you date of birth.",
+                minAge: "You must be at least 18 years old!"
+            }
+
+        }
+    });
+
+
+
+    $('#btnSaveLoan').click(function (e) {
+        if ($("#loanForm").valid()) {
+
+        e.preventDefault();
+        let save_button = this;
+        save_button.disabled = true;
+        save_button.innerHTML = 'Processing Loan...';
+
+        let model = $('#loanForm').serializeJSON();
+        const homeOwner = $('#homeOwner').prop('checked');
+        model.homeOwner = homeOwner;
+        model.paymentList = paymentListArray;
+        model.applicantId = 0;
+        console.log('model', model);
+
+
+
+        fetch('/api/newloan', {
+            method: 'post',
+            headers: {
+                "Content-type": "application/json",
+            },
+            body: JSON.stringify(model)
+        }).then(response => {
+            if (!response.ok) {
+                return Promise.reject(response);
+            }
+            return response.json();
+        })
+            .then(data => {
+                console.log("Success");
+                console.log(data);
+                location.replace(url);
+            })
+            .catch(error => {
+                if (typeof error.json === "function") {
+                    error.json().then(jsonError => {
+                        console.log("Json error from API");
+                        console.log(jsonError);
+                    }).catch(genericError => {
+                        console.log("Generic error from API");
+                        console.log(error.statusText);
+                    });
+                } else {
+                    console.log("Fetch error");
+                    console.log(error);
+                }
+            });
+
+        } else {
+            // do stuff if form is not valid
+        }
+
+    });
+
+            //#region Slider
+
+            var slider = document.getElementById("myRange");
+            var output = document.getElementById("demo");
+            var totalOwed = document.getElementById("totalOwed");
+
+            var defaultAmount = slider.value;
+
+            var defaultTotalRepaymentAmount = round((115 / 100) * Number(defaultAmount));
+            var nairaAmount = Number(defaultAmount).toLocaleString('en-NG', { style: 'currency', currency: 'NGN' });
+            var nairaOwedAmount = Number(defaultTotalRepaymentAmount).toLocaleString('en-NG', { style: 'currency', currency: 'NGN' });
+                    output.innerHTML = nairaAmount;
+                    totalOwed.innerHTML = nairaOwedAmount;
+            var defaultMonthlyPayment = round((defaultTotalRepaymentAmount / term), 2, 2);
+            var defaultMonthlyPaymenText = Number(defaultMonthlyPayment).toLocaleString('en-NG', { style: 'currency', currency: 'NGN' });
+
+            $('#amount').val(defaultAmount);
+            $('#totalAmountPayable').val(defaultTotalRepaymentAmount);
+            $('#termlyAmountPayable').val(defaultMonthlyPayment);
+            var defaultMonthArray = dateRange(nextMonthDate, eighteenMonth);
+            createList(defaultMonthArray, defaultMonthlyPaymenText);
+            paymentListArray = defaultMonthArray;
+
+            slider.oninput = function () {
+                var amount = this.value;
+                var nairaVal = Number(amount).toLocaleString('en-NG', { style: 'currency', currency: 'NGN' });
+                var totalRepaymentAmount = round((115 / 100) * Number(amount));
+                var nairaOwedAmountVal = Number(totalRepaymentAmount).toLocaleString('en-NG', { style: 'currency', currency: 'NGN' });
+                output.innerHTML = nairaVal;
+                totalOwed.innerHTML = nairaOwedAmountVal;
+                var monthArray = dateRange(nextMonthDate, eighteenMonth);
+                var monthlyPayment = round((totalRepaymentAmount / term), 2, 2);
+                var monthlyPaymenText = Number(monthlyPayment).toLocaleString('en-NG', { style: 'currency', currency: 'NGN' });
+
+                $('#amount').val(amount);
+                $('#totalAmountPayable').val(totalRepaymentAmount);
+                $('#termlyAmountPayable').val(monthlyPayment);
+
+
+                createList(monthArray, monthlyPaymenText);
+                paymentListArray = monthArray;
+            }
+
+            //End slider
+    //#endregion
+
+
+
+    //#region Multipage
+            //jQuery time
+            var current_fs, next_fs, previous_fs; //sections
+            var left, opacity, scale; //section properties which we will animate
+            var animating; //flag to prevent quick multi-click glitches
+
+            $(".next").click(function () {
+                if (animating) return false;
+                animating = true;
+
+                current_fs = $(this).parent();
+                next_fs = $(this).parent().next();
+
+                //activate next step on progressbar using the index of next_fs
+                $("#progressbar li").eq($("section").index(next_fs)).addClass("active");
+
+                //show the next section
+                next_fs.show();
+                //hide the current section with style
+                current_fs.animate({ opacity: 0 }, {
+                    step: function (now, mx) {
+                        //as the opacity of current_fs reduces to 0 - stored in "now"
+                        //1. scale current_fs down to 80%
+                        scale = 1 - (1 - now) * 0.2;
+                        //2. bring next_fs from the right(50%)
+                        left = (now * 50) + "%";
+                        //3. increase opacity of next_fs to 1 as it moves in
+                        opacity = 1 - now;
+                        current_fs.css({
+                            'transform': 'scale(' + scale + ')',
+                            'position': 'absolute'
+                        });
+                        next_fs.css({ 'left': left, 'opacity': opacity });
+                    },
+                    duration: 800,
+                    complete: function () {
+                        current_fs.hide();
+                        animating = false;
+                    },
+                    //this comes from the custom easing plugin
+                    easing: 'easeInOutBack'
+                });
+            });
+
+            $(".previous").click(function () {
+                if (animating) return false;
+                animating = true;
+
+                current_fs = $(this).parent();
+                previous_fs = $(this).parent().prev();
+
+                //de-activate current step on progressbar
+                $("#progressbar li").eq($("section").index(current_fs)).removeClass("active");
+
+                //show the previous section
+                previous_fs.show();
+                //hide the current section with style
+                current_fs.animate({ opacity: 0 }, {
+                    step: function (now, mx) {
+                        //as the opacity of current_fs reduces to 0 - stored in "now"
+                        //1. scale previous_fs from 80% to 100%
+                        scale = 0.8 + (1 - now) * 0.2;
+                        //2. take current_fs to the right(50%) - from 0%
+                        left = ((1 - now) * 50) + "%";
+                        //3. increase opacity of previous_fs to 1 as it moves in
+                        opacity = 1 - now;
+                        current_fs.css({ 'left': left });
+                        previous_fs.css({ 'transform': 'scale(' + scale + ')', 'opacity': opacity });
+                    },
+                    duration: 800,
+                    complete: function () {
+                        current_fs.hide();
+                        animating = false;
+                    },
+                    //this comes from the custom easing plugin
+                    easing: 'easeInOutBack'
+                });
+            });
+
+
+    //#endregion
+
+
+
+            //#region Date Manipulations
+
+            // request a weekday along with a long date
+                    var options = {  year: 'numeric', month: 'short', day: 'numeric' };
+            function formatDate(date) {
+                let newDate = new Date(date);
+                console.log(newDate.toLocaleDateString('en-NG', options));
+                return newDate.toLocaleDateString('en-NG', options);
+            }
+
+            function daysInMonth(month, year) {
+                return new Date(year, month, 0).getDate();
+            }
+
+
+
+            function dateRange(startDate, endDate) {
+                var start = startDate.split('-');
+                var end = endDate.split('-');
+                var startYear = parseInt(start[0]);
+                var endYear = parseInt(end[0]);
+                var dates = [];
+
+                for (var i = startYear; i <= endYear; i++) {
+                    var endMonth = i != endYear ? 11 : parseInt(end[1]) - 1;
+                    var startMon = i === startYear ? parseInt(start[1]) - 1 : 0;
+                    for (var j = startMon; j <= endMonth; j = j > 12 ? j % 12 || 11 : j + 1) {
+                        var month = j + 1;
+                        var displayMonth = month < 10 ? '0' + month : month;
+                        dates.push([i, displayMonth, daysInMonth(displayMonth,i)].join('-'));
+                    }
+                }
+                return dates;
+            }
+
+        let today = new Date().toLocaleDateString();
+        var startDateFormat = new Date(serverDate);
+
+                    var addDate = startDateFormat.setMonth(startDateFormat.getMonth() + term);
+                    console.log('nextMonthDate', nextMonthDate);
+        console.log('eighteenMonth', eighteenMonth);
+            console.log(dateRange(nextMonthDate, eighteenMonth));
+
+             //#endregion
+
+
+            //#region My Methods
+
+            function getFormData($form) {
+                var unindexed_array = $form.serializeArray();
+                var indexed_array = {};
+
+                $.map(unindexed_array, function (n, i) {
+                    indexed_array[n['name']] = n['value'];
+                });
+
+                return indexed_array;
+            }
+
+
+            function round(
+                value,
+                minimumFractionDigits,
+                maximumFractionDigits
+            ) {
+                const formattedValue = value.toLocaleString('en', {
+                    useGrouping: false,
+                    minimumFractionDigits,
+                    maximumFractionDigits
+                })
+                return Number(formattedValue)
+            }
+
+
+            function createList(arr, text) {
+                listItems = arr.reduce((result, item) => {
+                    // Add a string to the result for the current item. This syntax is using template literals.
+                    @*result += `<li>${item}</li>`;*@
+                    result += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                        ${formatDate(item)}
+                                    <span class="badge bg-primary rounded-pill">${text}</span>
+                    </li>`;
+
+                    // Always return the result in the reduce callback, it will be the value or result in the next iteration.
+                    return result;
+                }, '');
+                resultElement = document.getElementById('paymentList');
+                resultElement.innerHTML = listItems;
+            }
+
+
+
+    //#endregion
+
+
+        });
+    </script>
+
+}
+

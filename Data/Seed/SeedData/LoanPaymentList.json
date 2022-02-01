@@ -1,0 +1,21 @@
+﻿[
+    {
+        "id": 1,
+        "loanId": 1,
+        "applicantId": 1,
+        "termlyAmountPayable": 6388.89,
+        "paymentDueDate": "2022-04-25",
+        "isPaid": false
+    },
+    {
+        "id": 2,
+        "loanId": 2,
+        "applicantId": 2,
+        "termlyAmountPayable": 6388.89,
+        "paymentDueDate": "2022-04-25",
+        "isPaid": false
+    }
+]
+
+
+  

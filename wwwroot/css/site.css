@@ -1,0 +1,279 @@
+﻿html {
+    font-size: 14px;
+    position: relative;
+    min-height: 100%; 
+    /*background: #6441A5;*/ /* fallback for old browsers */
+    /*background: -webkit-linear-gradient(to left, #6441A5, #2a0845);*/ /* Chrome 10-25, Safari 5.1-6 */
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+
+body {
+    font-family: montserrat,verdana,arial;
+    background: transparent;
+}
+
+/* montserrat-regular - latin */
+@font-face {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 400;
+    src: url('./fonts/montserrat-v21-latin-regular.eot'); /* IE9 Compat Modes */
+    src: local(''), url('./fonts/montserrat-v21-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+    url('./fonts/montserrat-v21-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
+    url('./fonts/montserrat-v21-latin-regular.woff') format('woff'), /* Modern Browsers */
+    url('./fonts/montserrat-v21-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
+    url('./fonts/montserrat-v21-latin-regular.svg#Montserrat') format('svg'); /* Legacy iOS */
+}
+
+/*basic reset*/
+/** {
+    margin: 0;
+    padding: 0;
+}*/
+
+
+
+.footer {
+    background-color: white;
+}
+/*form styles*/
+#msform {
+    text-align: center;
+    position: relative;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+    #msform section {
+        background: white;
+        border: 0 none;
+        border-radius: 0px;
+        box-shadow: 0 0 15px 1px rgba(0, 0, 0, 0.4);
+        padding: 20px 30px;
+        box-sizing: border-box;
+        width: 90%;
+        margin: 0 5%;
+        /*stacking sections above each other*/
+        position: relative;
+    }
+
+        /*Hide all except first section*/
+        #msform section:not(:first-of-type) {
+            display: none;
+        }
+
+    /*inputs*/
+    #msform input[type=text], #msform textarea {
+        padding: 15px;
+        border: 1px solid #ccc;
+        border-radius: 0px;
+        margin-bottom: 10px;
+        width: 100%;
+        box-sizing: border-box;
+        font-family: montserrat;
+        color: #2C3E50;
+        font-size: 13px;
+    }
+
+        #msform input:focus, #msform textarea:focus {
+            -moz-box-shadow: none !important;
+            -webkit-box-shadow: none !important;
+            box-shadow: none !important;
+            border: 1px solid #0390fc;
+            outline-width: 0;
+            transition: All 0.5s ease-in;
+            -webkit-transition: All 0.5s ease-in;
+            -moz-transition: All 0.5s ease-in;
+            -o-transition: All 0.5s ease-in;
+        }
+#msform input[type="range"]:focus {
+    border: none;
+}
+
+    /*buttons*/
+    #msform .action-button {
+        width: 100px;
+        background: #0b8c29;
+        font-weight: bold;
+        color: white;
+        border: 0 none;
+        border-radius: 25px;
+        cursor: pointer;
+        padding: 10px 5px;
+        margin: 10px 5px;
+    }
+
+        #msform .action-button:hover, #msform .action-button:focus {
+            box-shadow: 0 0 0 2px white, 0 0 0 3px #ee0979;
+        }
+
+    #msform .action-button-previous {
+        width: 100px;
+        background: #f52533;
+        font-weight: bold;
+        color: white;
+        border: 0 none;
+        border-radius: 25px;
+        cursor: pointer;
+        padding: 10px 5px;
+        margin: 10px 5px;
+    }
+
+        #msform .action-button-previous:hover, #msform .action-button-previous:focus {
+            box-shadow: 0 0 0 2px white, 0 0 0 3px #C5C5F1;
+        }
+
+/*headings*/
+.fs-title {
+    font-size: 18px;
+    text-transform: uppercase;
+    color: #2C3E50;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+    font-weight: bold;
+}
+
+.fs-subtitle {
+    font-weight: normal;
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+/*progressbar*/
+#progressbar {
+    margin-bottom: 30px;
+    margin-left: -60px;
+    overflow: hidden;
+    /*CSS counters to number the steps*/
+    counter-reset: step;
+}
+
+    #progressbar li {
+        list-style-type: none;
+        color: white;
+        text-transform: uppercase;
+        font-size: 9px;
+        width: 33.33%;
+        float: left;
+        position: relative;
+        letter-spacing: 1px;
+    }
+
+        #progressbar li:before {
+            content: counter(step);
+            counter-increment: step;
+            width: 24px;
+            height: 24px;
+            line-height: 26px;
+            display: block;
+            font-size: 12px;
+            color: #333;
+            background: white;
+            border-radius: 25px;
+            margin: 0 auto 10px auto;
+        }
+
+        /*progressbar connectors*/
+        #progressbar li:after {
+            content: '';
+            width: 100%;
+            height: 2px;
+            background: white;
+            position: absolute;
+            left: -50%;
+            top: 9px;
+            z-index: -1; /*put it behind the numbers*/
+        }
+
+        #progressbar li:first-child:after {
+            /*connector not needed before the first step*/
+            content: none;
+        }
+
+        /*marking active/completed steps green*/
+        /*The number of the step and the connector before it = green*/
+        #progressbar li.active:before, #progressbar li.active:after {
+            background: #ee0979;
+            color: white;
+        }
+
+/*slider*/
+
+
+.slidecontainer {
+    width: 100%;
+}
+
+.slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 27px;
+    background: #187fba;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+    .slider:hover {
+        opacity: 1;
+    }
+
+input[type="range"]::-webkit-slider-runnable-track {
+    height: 4px;
+    cursor: pointer;
+    animate: 0.2s;
+    background: #03a9f4;
+    border-radius: 25px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 4px 0 rgba(0, 0, 0, 1);
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: -8px;
+}
+
+input[type="range"]:focus::-webkit-slider-runnable-track {
+    background: #03a9f4;
+}
+
+
+/*input[type=range]::-webkit-range-track {
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    background: #ededef;
+}
+
+input[type="range"]:focus::-webkit-slider-runnable-track {
+    background: #888a87;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 27px;
+    height: 27px;
+    background: #187fba;
+    cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+    width: 27px;
+    height: 27px;
+    background: #187fba;
+    cursor: pointer;
+}
+*/

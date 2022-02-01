@@ -1,0 +1,19 @@
+﻿[
+    {
+        "id": 1,
+        "name": "Baba Usman",
+        "address": "Citec Estate, Abuja",
+        "dateOfBirth": "1980-04-23",
+        "email": "baba@yahoo.com",
+        "homeOwner": true
+    },
+    {
+        "id": 2,
+        "name": "Dele Adeyemi",
+        "address": "Suncity Estate, Abuja",
+        "dateOfBirth": "1983-06-23",
+        "email": "dele@gmail.com",
+        "homeOwner": false
+    }
+]
+
